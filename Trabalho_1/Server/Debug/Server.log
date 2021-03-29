@@ -1,0 +1,4 @@
+﻿  mtserver.c
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho_1\Server\mtserver.c(47,36): warning C4305: 'function': truncation from 'int' to 'u_short'
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho_1\Server\mtserver.c(168): warning C4715: 'handleconnection': not all control paths return a value
+  Server.vcxproj -> C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho_1\Debug\Server.exe
