@@ -1,4 +1,5 @@
 ﻿  mtserver.c
-C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho_1\Server\mtserver.c(47,36): warning C4305: 'function': truncation from 'int' to 'u_short'
-C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho_1\Server\mtserver.c(168): warning C4715: 'handleconnection': not all control paths return a value
-  Server.vcxproj -> C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho_1\Debug\Server.exe
+C:\Users\Francisco\Desktop\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(33,18): warning C4244: 'function': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\Francisco\Desktop\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(58,36): warning C4305: 'function': truncation from 'int' to 'u_short'
+C:\Users\Francisco\Desktop\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(216): warning C4715: 'handleconnection': not all control paths return a value
+  Server.vcxproj -> C:\Users\Francisco\Desktop\SistemasDistribuidos\Trabalho_1\Debug\Server.exe
