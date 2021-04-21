@@ -3,10 +3,16 @@
 */
 
 #include<stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 #include<winsock2.h>
 
 #pragma comment(lib,"ws2_32.lib")
 #pragma warning(disable : 4996)
+
+int octetIsNumber(char* octet);
+int isValidIP(char* IP);
 
 int main(int argc, char* argv[])
 {
@@ -15,6 +21,7 @@ int main(int argc, char* argv[])
 	struct sockaddr_in server;
 	char server_reply[2000];
 	char message[2000] = "date";
+	char serverIP[13];
 	int recv_size;
 	int ws_result;
 
@@ -37,8 +44,19 @@ int main(int argc, char* argv[])
 
 	printf("Socket created.\n");
 
+	
+	//Ask user for IP
+	do {
+
+		printf("Insert the IP of the server: \n");
+		scanf("%s", serverIP);
+
+	} while (!isValidIP(serverIP));
+	
+
+
 	// create the socket  address (ip address and port)
-	server.sin_addr.s_addr = inet_addr("127.0.0.1");
+	server.sin_addr.s_addr = inet_addr(serverIP);
 	server.sin_family = AF_INET;
 	server.sin_port = htons(68000);
 
@@ -103,4 +121,68 @@ int main(int argc, char* argv[])
 	WSACleanup();
 
 	return 0;
+}
+
+//Check if an octet of the IP given by the user is a number
+int octetIsNumber(char* octet) {
+
+	while (*octet != '\0') {
+		if (!isdigit(*octet)) {
+			return 0;
+		}
+		octet++;
+	}
+	return 1;
+}
+
+//Check if the IP given by the user is valid
+int isValidIP(char* IP) {
+
+	char aux[13];
+	strcpy(aux, IP);
+	char* ptr;
+	int octetAsInt, IPdots = 0;
+
+	if (aux == NULL) {
+		return 0;
+	}
+
+	//Break the string into tokens based on the provided delimiter
+	//If IP = "192.231.1.0" tokens are "192", "231", "1" and "0"
+	ptr = strtok(aux, ".");
+
+	//If the delimiter is not found on the string, there are no tokens returned my strtok and thus is not a valid IP
+	if (ptr == NULL) {
+		return 0;
+	}
+
+	while (ptr != '\0') {
+
+		if (!octetIsNumber(ptr)) {
+			return 0;
+		}
+
+		octetAsInt = atoi(ptr);
+
+		if (octetAsInt >= 0 && octetAsInt <= 255) {
+
+			//NULL tells strtok to continue tokenizing the string passed in the first call
+			ptr = strtok(NULL, ".");
+			if (ptr != NULL) {
+
+				IPdots++;
+			}
+
+		}
+		else {
+			return 0;
+		}
+	}
+
+	if (IPdots != 3) {
+
+		return 0;
+	}
+
+	return 1;
 }

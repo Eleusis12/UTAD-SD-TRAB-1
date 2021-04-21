@@ -12,6 +12,7 @@ Simple winsock Server
 #define MIN_NUMBER 1
 #define MAX_STAR 12
 #define MIN_STAR 1
+#define KEY_FILE "keys.txt"
 
 #pragma comment (lib, "ws2_32.lib")
 #pragma warning(disable : 4996)
@@ -27,6 +28,7 @@ char* convert_array_to_string(int array[], int n);
 int* check_duplicates(int* array, int* size, int lower_bound, int upper_bound);
 void print_array(int* a, int len);
 int find_elem(int value, const int a[], int m, int n);
+char* countSuppliedKeys();
 
 int main()
 {
@@ -181,12 +183,14 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 			print_array(key_generated, 7);
 
 			// Abrir o ficheiro para efetuar o registo
-			//save_key_to_file(key_generated);
+			save_key_to_file(key_generated);
 
 			// Enviar para o cliente a chave gerada
 
-			strcpy(strMsg, "\n\nChave do euromilhões: ");
-			strcpy(strMsg, convert_array_to_string(key_generated, 7));
+			strcpy(strMsg, "\n\nChave do euromilhoes: ");
+			strcat(strMsg, convert_array_to_string(key_generated, 7));
+			strcat(strMsg, "\n Chaves fornecidas: ");
+			strcat(strMsg, countSuppliedKeys());
 
 			//strcat(strMsg, convert_array_to_string(int array[], int n));
 			strcat(strMsg, "\n");
@@ -281,14 +285,32 @@ int random_number(int min_num, int max_num)
 }
 
 void save_key_to_file(int* key) {
+
+	int fileWriteError = 0;
+	int* endOfArray = key + 7;
+
 	FILE* fp;
-	if ((fp = fopen("test.txt", "wb")) == NULL) {
-		printf("Não foi possível abrir o ficheiro.\n");
+	fp = fopen(KEY_FILE, "a+");
+	
+	if ( fp == NULL) {
+		perror("fopen");
 	}
 
 	// Regista o ficheiro, a chave gerada
-	if (fwrite(key, sizeof(int), 7, fp) != 7)
-		printf("File read error.");
+	while (key != endOfArray && fileWriteError == 0) {
+
+		if (fprintf(fp, "%d ", *key) > 0) {
+			key++;
+		}
+		else {
+			printf("Erro ao escrever no ficheiro!\n");
+			fileWriteError = 1;
+		}
+	}
+	time_t currentTime = time(0);
+	char* cT = ctime(&currentTime);
+
+	fprintf(fp, "- %s", cT);
 
 	// Fecha ficheiro
 	fclose(fp);
@@ -343,4 +365,31 @@ int find_elem(int value, const int a[], int m, int n)
 	while (m < n && a[m] != value) m++;
 
 	return m == n ? -1 : m;
+}
+
+char* countSuppliedKeys() {
+
+	FILE* fp;
+	char keyCountString[1024];
+	fp = fopen(KEY_FILE, "r");
+
+	if ( fp == NULL) {
+		perror("fopen");
+	}
+
+	int keyCount = 0;
+	int ch = 0;
+
+	while (!feof(fp)) {
+
+		ch = fgetc(fp);
+
+		if (ch == '\n') {
+			keyCount++;
+		}
+	}
+
+	sprintf(keyCountString, "%d", keyCount);
+
+	return keyCountString;
 }

@@ -1,0 +1,19 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "default",
+      "project": "Trabalho_1\\Client\\client.c",
+      "projectTarget": "",
+      "name": "client.c"
+    },
+    {
+      "type": "default",
+      "project": "Trabalho_1\\Server\\mtserver.c",
+      "projectTarget": "",
+      "name": "mtserver.c"
+
+    }
+  ]
+}
