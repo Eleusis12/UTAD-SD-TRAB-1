@@ -6,12 +6,14 @@ Simple winsock Server
 #include <stdlib.h>
 #include <winsock2.h>
 #include <time.h>
+#include <windows.h>
 #define TRUE 1
 #define DS_TEST_PORT 68000
 #define MAX_NUMBER 50
 #define MIN_NUMBER 1
 #define MAX_STAR 12
 #define MIN_STAR 1
+#define KEY_SIZE 7
 #define KEY_FILE "keys.txt"
 
 #pragma comment (lib, "ws2_32.lib")
@@ -29,10 +31,10 @@ int* check_duplicates(int* array, int* size, int lower_bound, int upper_bound);
 void print_array(int* a, int len);
 int find_elem(int value, const int a[], int m, int n);
 char* countSuppliedKeys();
+int keyExists(int* keyGenerated);
 
 int main()
 {
-	srand(time(NULL));
 
 	// Initialise winsock
 	WSADATA wsData;
@@ -75,6 +77,7 @@ int main()
 	DWORD dwThreadId;
 	HANDLE  hThread;
 	int conresult = 0;
+	
 
 	while (TRUE)
 	{
@@ -117,6 +120,8 @@ int main()
 
 DWORD WINAPI handleconnection(LPVOID lpParam)
 {
+	srand(time(NULL));
+
 	char strMsg[1024];
 	char strRec[1024];
 
@@ -164,23 +169,19 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 		else if (strcmp(strRec, "get") == 0) {
 			// Gerar a Chave
 
-			int* key_generated = random_key(random_number);
+			int* key_generated;
+
+			do {
+
+				key_generated = random_key(random_number);
+
+			} while (keyExists(key_generated));
 
 			if (!key_generated) {
 				printf("ERROR: Não foi possível gerar a chave do euromilhões");
 			}
 
-			// Verificar pela existência de duplicações na chave gerada
-			int size_numbers_duplicates = 0;
-			int size_stars_duplicates = 0;
-			int* numbers_duplicated = check_duplicates(key_generated, &size_numbers_duplicates, 0, 4);
-			int* stars_duplicated = check_duplicates(key_generated, &size_stars_duplicates, 5, 7);
-
-			if (size_numbers_duplicates != 0 || size_stars_duplicates != 0) {
-				printf("ERROR: Chave possui números repetidos");
-			}
-
-			print_array(key_generated, 7);
+			print_array(key_generated, KEY_SIZE);
 
 			// Abrir o ficheiro para efetuar o registo
 			save_key_to_file(key_generated);
@@ -216,49 +217,41 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 			closesocket(cs);
 			return 0;
 		}
+		
 	}
 }
 // Função que gera uma chave do euromilhoes de forma aleatória
 int* random_key(int (*random_number)(int, int)) {
 	// Array que vai armazenar a chave do euromilhoes
-	int* key = (int*)malloc(7 * sizeof(int));
+	int* key = (int*)malloc(KEY_SIZE * sizeof(int));
 	if (!key)
 		return NULL;
 
-	int i = 0;
 	int temp = 0;
+	int generatedNums = 0;
 	// Gerar os 5 números
-	for (i = 0; i < 5; i++)
-	{
-	generate_number:
+	while (generatedNums != 5) {
+
 		temp = (*random_number)(MIN_NUMBER, MAX_NUMBER);
-		// O elemento gerado encontra-se no array, temos que evitar situações de duplicações
 
-		if (find_elem(temp, key, 0, i) != -1)
-		{
-			goto generate_number;
+		if (find_elem(temp, key, 0, generatedNums) == -1) {
+			key[generatedNums] = temp;
+			generatedNums++;
 		}
-		// O elemento gerado não se encontra no array
-		else {
-			key[i] = temp;
+
+	}
+
+	while (generatedNums != 7) {
+
+		temp = (*random_number)(MIN_NUMBER, MAX_NUMBER);
+
+		//Stars start on the 5th position fo the array
+		if (find_elem(temp, key, 5, generatedNums) == -1) {
+			key[generatedNums] = temp;
+			generatedNums++;
 		}
 	}
 
-	// Gerar as estrelas
-	for (; i < 7; i++)
-	{
-	generate_star:
-		temp = (*random_number)(MIN_STAR, MAX_STAR);
-		// O elemento gerado encontra-se no array, temos que evitar situações de duplicações
-		if (find_elem(temp, key, 5, i) != -1)
-		{
-			goto generate_star;
-		}
-		// O elemento gerado não se encontra no array
-		else {
-			key[i] = temp;
-		}
-	}
 
 	// Retorna a chave
 	return key;
@@ -279,7 +272,7 @@ int random_number(int min_num, int max_num)
 		hi_num = min_num;
 	}
 
-	//srand(time(NULL));
+	
 	result = (rand() % (hi_num - low_num)) + low_num;
 	return result;
 }
@@ -287,13 +280,13 @@ int random_number(int min_num, int max_num)
 void save_key_to_file(int* key) {
 
 	int fileWriteError = 0;
-	int* endOfArray = key + 7;
+	int* endOfArray = key + KEY_SIZE;
 
 	FILE* fp;
 	fp = fopen(KEY_FILE, "a+");
 	
 	if ( fp == NULL) {
-		perror("fopen");
+		perror("Erro a abrir ficheiro!\n");
 	}
 
 	// Regista o ficheiro, a chave gerada
@@ -316,6 +309,56 @@ void save_key_to_file(int* key) {
 	fclose(fp);
 }
 
+int keyExists(int* keyGenerated) {
+
+	FILE* fp;
+	fp = fopen(KEY_FILE, "r");
+	int exists = 0;
+
+	if (fp == NULL) {
+		perror("Erro a abrir ficheiro!\n");
+	}
+	
+	char line[255];
+	
+
+	while (!feof(fp)) {
+
+		int keyPlace = 0;
+		int key[KEY_SIZE];
+		char* numbers;
+		char lineSeparation[255];
+
+		fgets(line, 255, fp);
+		strcpy(lineSeparation, line);
+
+		//Separate key from date emmited
+		strtok(lineSeparation, "-");
+		//Separate each number
+		numbers = strtok(lineSeparation, " ");
+
+
+		while (numbers != NULL) {
+
+			key[keyPlace] = atoi(numbers);
+			numbers = strtok(NULL, " ");
+			keyPlace++;
+			
+		}
+
+		for (int i = 0; i < KEY_SIZE; i++) {
+
+			if (key[i] == keyGenerated[i]) {
+				exists = 1;
+			}
+		}
+		
+	}
+
+	return exists;
+
+}
+
 // Converte um array de inteiros para uma string
 char* convert_array_to_string(int array[], int n) {
 	int i;
@@ -326,32 +369,6 @@ char* convert_array_to_string(int array[], int n) {
 		point += sprintf(point, i + 1 != n ? "%d," : "%d]", array[i]);
 
 	return output;
-}
-
-// A função procura elementos duplicados dentro de um array
-// lower_bound e upper_bound define os limites de procura dentro do array
-int* check_duplicates(int* array, int* size, int lower_bound, int upper_bound)
-{
-	// Elementos Duplicados
-	int* duplicates = (int*)malloc(7 * sizeof(int));
-	if (duplicates == NULL)
-		return NULL;
-
-	*size = 0;
-	// Número de elementos a avaliar
-	int count = (upper_bound - lower_bound + 1);
-
-	for (int i = lower_bound; i < lower_bound + count - 1; i++) { // read comment by @nbro
-		for (int j = i + 1; j < lower_bound + count; j++) {
-			if (array[i] == array[j]) {
-				printf("%d[%d] ==  %d[%d]\n", array[i], i, array[j], j);
-				duplicates[*size] = array[i];
-				*size += 1;
-			}
-		}
-	}
-
-	return duplicates;
 }
 
 // Imprime array para efeitos de debug
