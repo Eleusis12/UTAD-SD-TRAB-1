@@ -15,6 +15,7 @@ Simple winsock Server
 #define MIN_STAR 1
 #define KEY_SIZE 7
 #define KEY_FILE "keys.txt"
+#define mutLabel "mutexLabel"
 
 #pragma comment (lib, "ws2_32.lib")
 #pragma warning(disable : 4996)
@@ -27,11 +28,12 @@ int* random_key(int (*random_number)(int, int));
 int random_number(int min_num, int max_num);
 void save_key_to_file(int* key);
 char* convert_array_to_string(int array[], int n);
-int* check_duplicates(int* array, int* size, int lower_bound, int upper_bound);
 void print_array(int* a, int len);
 int find_elem(int value, const int a[], int m, int n);
 char* countSuppliedKeys();
 int keyExists(int* keyGenerated);
+
+HANDLE sharedMutex;
 
 int main()
 {
@@ -77,6 +79,19 @@ int main()
 	DWORD dwThreadId;
 	HANDLE  hThread;
 	int conresult = 0;
+	HANDLE keyFileMutex;
+
+	// Create a mutex with no initial owner
+	sharedMutex = CreateMutex(
+		NULL,              // default security attributes
+		FALSE,             // initially not owned
+		mutLabel);             // unnamed mutex
+
+	if (sharedMutex == NULL)
+	{
+		printf("CreateMutex error: %d\n", GetLastError());
+		return 1;
+	}
 	
 
 	while (TRUE)
@@ -114,6 +129,8 @@ int main()
 	// Close listening socket
 	closesocket(listening);
 
+	CloseHandle(sharedMutex);
+
 	//Cleanup winsock
 	WSACleanup();
 }
@@ -128,6 +145,8 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 	int i = 1;
 	SOCKET cs;
 	SOCKET* ptCs;
+
+	HANDLE mutex;
 
 	ptCs = (SOCKET*)lpParam;
 	cs = *ptCs;
@@ -163,10 +182,15 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 
 			send(cs, strMsg, strlen(strMsg) + 1, 0);
 
-			// just to echo!
-			// send(cs, strRec, bytesReceived + 1, 0);
+			
 		}
 		else if (strcmp(strRec, "get") == 0) {
+
+			mutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, mutLabel);
+
+			if (mutex == NULL) {
+				printf("Mutex error: %d\n", GetLastError());
+			}
 			// Gerar a Chave
 
 			int* key_generated;
@@ -184,14 +208,23 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 			print_array(key_generated, KEY_SIZE);
 
 			// Abrir o ficheiro para efetuar o registo
+			WaitForSingleObject(mutex, INFINITE);
+
 			save_key_to_file(key_generated);
+
+			ReleaseMutex(mutex);
 
 			// Enviar para o cliente a chave gerada
 
-			strcpy(strMsg, "\n\nChave do euromilhoes: ");
-			strcat(strMsg, convert_array_to_string(key_generated, 7));
-			strcat(strMsg, "\n Chaves fornecidas: ");
-			strcat(strMsg, countSuppliedKeys());
+			//strcpy(strMsg, "\n\nChave do euromilhoes: ");
+			//strcat(strMsg, convert_array_to_string(key_generated, 7));
+			//strcat(strMsg, "\n Chaves fornecidas: ");
+
+			WaitForSingleObject(mutex, INFINITE);
+
+			//strcat(strMsg, countSuppliedKeys());
+
+			ReleaseMutex(mutex);
 
 			//strcat(strMsg, convert_array_to_string(int array[], int n));
 			strcat(strMsg, "\n");
@@ -200,6 +233,7 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 
 			// Libertar memória
 			free(key_generated);
+			CloseHandle(mutex);
 			key_generated = NULL;
 		}
 		else if (strcmp(strRec, "help") == 0)
@@ -243,7 +277,7 @@ int* random_key(int (*random_number)(int, int)) {
 
 	while (generatedNums != 7) {
 
-		temp = (*random_number)(MIN_NUMBER, MAX_NUMBER);
+		temp = (*random_number)(MIN_STAR, MAX_STAR);
 
 		//Stars start on the 5th position fo the array
 		if (find_elem(temp, key, 5, generatedNums) == -1) {
@@ -281,6 +315,7 @@ void save_key_to_file(int* key) {
 
 	int fileWriteError = 0;
 	int* endOfArray = key + KEY_SIZE;
+	DWORD waitResult;
 
 	FILE* fp;
 	fp = fopen(KEY_FILE, "a+");
@@ -288,6 +323,8 @@ void save_key_to_file(int* key) {
 	if ( fp == NULL) {
 		perror("Erro a abrir ficheiro!\n");
 	}
+
+	
 
 	// Regista o ficheiro, a chave gerada
 	while (key != endOfArray && fileWriteError == 0) {
@@ -314,14 +351,21 @@ int keyExists(int* keyGenerated) {
 	FILE* fp;
 	fp = fopen(KEY_FILE, "r");
 	int exists = 0;
+	HANDLE mutex;
 
 	if (fp == NULL) {
 		perror("Erro a abrir ficheiro!\n");
 	}
 	
 	char line[255];
-	
 
+	mutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, mutLabel);
+
+	if (mutex == NULL) {
+		printf("Mutex error: %d\n", GetLastError());
+	}
+	
+	
 	while (!feof(fp)) {
 
 		int keyPlace = 0;
@@ -329,7 +373,9 @@ int keyExists(int* keyGenerated) {
 		char* numbers;
 		char lineSeparation[255];
 
+		WaitForSingleObject(mutex, INFINITE);
 		fgets(line, 255, fp);
+		ReleaseMutex(mutex);
 		strcpy(lineSeparation, line);
 
 		//Separate key from date emmited
@@ -354,6 +400,10 @@ int keyExists(int* keyGenerated) {
 		}
 		
 	}
+
+	CloseHandle(mutex);
+
+	
 
 	return exists;
 
