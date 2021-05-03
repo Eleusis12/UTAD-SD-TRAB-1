@@ -202,7 +202,7 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 			} while (keyExists(key_generated));
 
 			if (!key_generated) {
-				printf("ERROR: Não foi possível gerar a chave do euromilhões");
+				printf("ERROR: Nï¿½o foi possï¿½vel gerar a chave do euromilhï¿½es");
 			}
 
 			print_array(key_generated, KEY_SIZE);
@@ -217,7 +217,7 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 			// Enviar para o cliente a chave gerada
 
 			//strcpy(strMsg, "\n\nChave do euromilhoes: ");
-			//strcat(strMsg, convert_array_to_string(key_generated, 7));
+			strcat(strMsg, convert_array_to_string(key_generated, 7));
 			//strcat(strMsg, "\n Chaves fornecidas: ");
 
 			WaitForSingleObject(mutex, INFINITE);
@@ -231,7 +231,7 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 
 			send(cs, strMsg, strlen(strMsg) + 1, 0);
 
-			// Libertar memória
+			// Libertar memï¿½ria
 			free(key_generated);
 			CloseHandle(mutex);
 			key_generated = NULL;
@@ -239,12 +239,13 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 		else if (strcmp(strRec, "help") == 0)
 		{
 			strcpy(strMsg, "\n\nHelp: ");
-			strcat(strMsg, "\n");
+			strcat(strMsg, "O servidor utiliza os comandos get, help e quit.\n");
+
 
 			send(cs, strMsg, strlen(strMsg) + 1, 0);
 		}
 		else if (strcmp(strRec, "quit") == 0) {
-			strcpy(strMsg, "\nBye client...\n");
+			strcpy(strMsg, "\n400 BYE\n");
 			send(cs, strMsg, strlen(strMsg) + 1, 0);
 
 			// Close the socket
@@ -254,7 +255,7 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 		
 	}
 }
-// Função que gera uma chave do euromilhoes de forma aleatória
+// Funï¿½ï¿½o que gera uma chave do euromilhoes de forma aleatï¿½ria
 int* random_key(int (*random_number)(int, int)) {
 	// Array que vai armazenar a chave do euromilhoes
 	int* key = (int*)malloc(KEY_SIZE * sizeof(int));
@@ -263,7 +264,7 @@ int* random_key(int (*random_number)(int, int)) {
 
 	int temp = 0;
 	int generatedNums = 0;
-	// Gerar os 5 números
+	// Gerar os 5 nï¿½meros
 	while (generatedNums != 5) {
 
 		temp = (*random_number)(MIN_NUMBER, MAX_NUMBER);
@@ -291,7 +292,7 @@ int* random_key(int (*random_number)(int, int)) {
 	return key;
 }
 
-/*Retorna um random número inteiro, no intervalo [min_num, max_num]*/
+/*Retorna um random nï¿½mero inteiro, no intervalo [min_num, max_num]*/
 int random_number(int min_num, int max_num)
 {
 	int result = 0, low_num = 0, hi_num = 0;
@@ -315,7 +316,6 @@ void save_key_to_file(int* key) {
 
 	int fileWriteError = 0;
 	int* endOfArray = key + KEY_SIZE;
-	DWORD waitResult;
 
 	FILE* fp;
 	fp = fopen(KEY_FILE, "a+");
@@ -323,8 +323,6 @@ void save_key_to_file(int* key) {
 	if ( fp == NULL) {
 		perror("Erro a abrir ficheiro!\n");
 	}
-
-	
 
 	// Regista o ficheiro, a chave gerada
 	while (key != endOfArray && fileWriteError == 0) {
@@ -355,6 +353,7 @@ int keyExists(int* keyGenerated) {
 
 	if (fp == NULL) {
 		perror("Erro a abrir ficheiro!\n");
+		return 1;
 	}
 	
 	char line[255];
@@ -403,7 +402,7 @@ int keyExists(int* keyGenerated) {
 
 	CloseHandle(mutex);
 
-	
+	fclose(fp);
 
 	return exists;
 
@@ -439,6 +438,13 @@ char* countSuppliedKeys() {
 	FILE* fp;
 	char keyCountString[1024];
 	fp = fopen(KEY_FILE, "r");
+	HANDLE mutex;
+
+	mutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, mutLabel);
+
+	if (mutex == NULL) {
+		printf("Mutex error: %d\n", GetLastError());
+	}
 
 	if ( fp == NULL) {
 		perror("fopen");
@@ -448,8 +454,9 @@ char* countSuppliedKeys() {
 	int ch = 0;
 
 	while (!feof(fp)) {
-
+		WaitForSingleObject(mutex, INFINITE);
 		ch = fgetc(fp);
+		ReleaseMutex(mutex);
 
 		if (ch == '\n') {
 			keyCount++;
@@ -457,6 +464,8 @@ char* countSuppliedKeys() {
 	}
 
 	sprintf(keyCountString, "%d", keyCount);
+
+	CloseHandle(mutex);
 
 	return keyCountString;
 }
