@@ -356,7 +356,7 @@ int keyExists(int* keyGenerated) {
 
 	if (fp == NULL) {
 		perror("Erro a abrir ficheiro!\n");
-		return 1;
+		return 0;
 	}
 	
 	char line[255];

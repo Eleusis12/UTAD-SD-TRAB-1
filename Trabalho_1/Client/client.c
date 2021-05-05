@@ -93,6 +93,7 @@ int main(int argc, char* argv[])
 			printf("Indique quantas chaves de euromilhões quer gerar: \n");
 
 			scanf("%d", &i);
+			count = 0; 
 
 			do {
 				// Efetuar limpeza no espa�o de mem�ria reservado para o command

@@ -1,3 +1,4 @@
 ﻿  client.c
-C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho_1\Client\client.c(43,31): warning C4305: 'function': truncation from 'int' to 'u_short'
-  Client.vcxproj -> C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho_1\Debug\Client.exe
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Client\client.c(59,31): warning C4305: 'function': truncation from 'int' to 'u_short'
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Client\client.c(137,31): warning C4047: '<': 'int' differs in levels of indirection from 'char *'
+  Client.vcxproj -> C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Debug\Client.exe

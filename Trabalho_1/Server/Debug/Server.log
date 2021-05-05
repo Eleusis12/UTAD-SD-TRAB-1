@@ -1,5 +1,11 @@
 ﻿  mtserver.c
-C:\Users\Francisco\Desktop\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(33,18): warning C4244: 'function': conversion from 'time_t' to 'unsigned int', possible loss of data
-C:\Users\Francisco\Desktop\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(58,36): warning C4305: 'function': truncation from 'int' to 'u_short'
-C:\Users\Francisco\Desktop\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(216): warning C4715: 'handleconnection': not all control paths return a value
-  Server.vcxproj -> C:\Users\Francisco\Desktop\SistemasDistribuidos\Trabalho_1\Debug\Server.exe
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(64,36): warning C4305: 'function': truncation from 'int' to 'u_short'
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(88,11): warning C4133: 'function': incompatible types - from 'char [11]' to 'LPCWSTR'
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(82,9): warning C4101: 'keyFileMutex': unreferenced local variable
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(140,18): warning C4244: 'function': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(192,55): warning C4133: 'function': incompatible types - from 'char [11]' to 'LPCWSTR'
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(364,53): warning C4133: 'function': incompatible types - from 'char [11]' to 'LPCWSTR'
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(445,53): warning C4133: 'function': incompatible types - from 'char [11]' to 'LPCWSTR'
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(260): warning C4715: 'handleconnection': not all control paths return a value
+C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Server\mtserver.c(472): warning C4172: returning address of local variable or temporary: keyCountString
+  Server.vcxproj -> C:\Users\Francisco\OneDrive\Utad\3ºano\2ºsemestre\Sistemas Distribuídos\Trabalho Euromilhoes\SistemasDistribuidos\Trabalho_1\Debug\Server.exe
