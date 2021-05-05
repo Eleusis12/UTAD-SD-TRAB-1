@@ -125,13 +125,14 @@ int main(int argc, char* argv[])
 				if (tokens)
 				{
 					int i;
-					printf("Numeros= ");
+					printf("Numeros = ");
 					for (i = 0; i < 5; i++)
 					{
 						printf("|%s", *(tokens + i));
 						free(*(tokens + i));
 					}
-					printf("Estrelas= ");
+					printf("|");
+					printf(" Estrelas = ");
 					for (i; i < *(tokens + i); i++)
 					{
 						printf("|%s", *(tokens + i));
@@ -141,8 +142,6 @@ int main(int argc, char* argv[])
 					free(tokens);
 				}
 
-				// Imprime para a consola o Resultado da Resposta do servidor
-				printf("%s\n", server_reply);
 
 				count++;
 			} while (count < i);
@@ -207,6 +206,8 @@ int main(int argc, char* argv[])
 
 			printf("%s\n", server_reply);
 			flag = 0;
+
+			return 0;
 
 			break;
 

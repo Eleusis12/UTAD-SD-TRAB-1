@@ -156,8 +156,11 @@ DWORD WINAPI handleconnection(LPVOID lpParam)
 	send(cs, strMsg, strlen(strMsg) + 1, 0);
 
 	while (TRUE) {
+
 		ZeroMemory(strRec, 1024);
 		int bytesReceived = recv(cs, strRec, 1024, 0);
+		memset(strMsg, 0, sizeof(strMsg));
+
 		if (bytesReceived == SOCKET_ERROR) {
 			printf("\nReceive error!\n");
 			break;
@@ -348,7 +351,7 @@ int keyExists(int* keyGenerated) {
 
 	FILE* fp;
 	fp = fopen(KEY_FILE, "r");
-	int exists = 0;
+	int equalNumbers = 0;
 	HANDLE mutex;
 
 	if (fp == NULL) {
@@ -394,7 +397,7 @@ int keyExists(int* keyGenerated) {
 		for (int i = 0; i < KEY_SIZE; i++) {
 
 			if (key[i] == keyGenerated[i]) {
-				exists = 1;
+				equalNumbers++;
 			}
 		}
 		
@@ -404,7 +407,7 @@ int keyExists(int* keyGenerated) {
 
 	fclose(fp);
 
-	return exists;
+	return equalNumbers == 7 ? 1 : 0;
 
 }
 
@@ -412,10 +415,9 @@ int keyExists(int* keyGenerated) {
 char* convert_array_to_string(int array[], int n) {
 	int i;
 	char* output = (char*)malloc(128);
-	char* point = output + 1;
-	*output = '[';
+	char* point = output;
 	for (i = 0; i != n; ++i)
-		point += sprintf(point, i + 1 != n ? "%d," : "%d]", array[i]);
+		point += sprintf(point, i + 1 != n ? "%d," : "%d", array[i]);
 
 	return output;
 }
